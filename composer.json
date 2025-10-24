@@ -1,0 +1,11 @@
+{
+    "name": "portfolio-artistique",
+    "type": "project",
+    "require": {
+        "php": "^8.0"
+    },
+    "require-dev": {
+        "ext-curl": "*",
+        "ext-mbstring": "*"
+    }
+}
