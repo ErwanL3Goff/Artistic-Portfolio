@@ -1,4 +1,6 @@
 <?php
+$base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+$image_path = $base_url . '/images/';
 include 'data/images.php';
 $categories = array_keys($images);
 $activeCategory = $_GET['category'] ?? 'fanfiction';
@@ -63,6 +65,7 @@ $activeCategory = $_GET['category'] ?? 'fanfiction';
                         <div class="slider-item bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
                             <a href="image.php?category=<?= $activeCategory ?>&id=<?= $index ?>">
                                 <div class="image-container" style="background-image: url('images/<?= $image['file'] ?>')"></div>
+                                <div class="image-container" style="background-image: url('<?= $image_path . $image['file'] ?>')"></div>
                                 <div class="p-4">
                                     <h3 class="text-lg font-semibold"><?= $image['title'] ?></h3>
                                     <p class="text-gray-400 text-sm mt-2 truncate"><?= $image['description'] ?></p>

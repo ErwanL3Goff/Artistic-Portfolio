@@ -1,4 +1,7 @@
 <?php
+// Au début de chaque fichier PHP, ajouter ceci pour la base URL
+$base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+$image_path = $base_url . '/images/';
 include 'data/images.php';
 
 $category = $_GET['category'] ?? 'fanfiction';
@@ -23,7 +26,7 @@ $nextId = ($imageId + 1) % $totalImages;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $image['title'] ?> - Portfolio Artistique</title>
+    <title><?= $image['title'] ?><img src="<?= $image_path . $image['file'] ?>"  - Portfolio Artistique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
