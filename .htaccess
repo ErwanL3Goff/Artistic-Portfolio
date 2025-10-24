@@ -1,0 +1,17 @@
+RewriteEngine On
+
+# Rediriger tout vers index.php pour le routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Sécurité - empêcher l'accès aux fichiers sensibles
+<Files "*.php">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+<Files "composer.json">
+    Order Allow,Deny
+    Deny from all
+</Files>
