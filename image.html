@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de l'image - Portfolio Artistique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .detail-image-container {
+            max-width: 800px;
+            max-height: 1280px;
+            margin: 0 auto;
+        }
+        .detail-image {
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            max-height: 1280px;
+            object-fit: contain;
+        }
+        
+        /* Responsive pour les petits écrans */
+        @media (max-width: 768px) {
+            .detail-image-container {
+                max-width: 100%;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <header class="bg-gray-800 py-6">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold text-center">Portfolio Artistique</h1>
+            <p class="text-center text-gray-400 mt-2">Détails de l'œuvre</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="loading" class="text-center py-12">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-500 mb-4"></i>
+            <p class="text-gray-400">Chargement de l'image...</p>
+        </div>
+
+        <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden" id="image-detail-content" style="display: none;">
+            <!-- Le contenu sera chargé par JavaScript -->
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="index.html" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>Retour au portfolio
+            </a>
+        </div>
+    </main>
+
+    <script>
+        let imagesData = {};
+
+        // Formater le nom de catégorie pour l'affichage
+        function formatCategoryName(category) {
+            const names = {
+                'fanfiction': 'Fanfiction',
+                'portrait': 'Portrait',
+                'digitalfinger': 'Digital Finger'
+            };
+            return names[category] || category.charAt(0).toUpperCase() + category.slice(1);
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Charger les données JSON
+            try {
+                const response = await fetch('data/images.json');
+                const data = await response.json();
+                imagesData = data.images;
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const category = urlParams.get('category');
+                const id = urlParams.get('id');
+                
+                if (category && id !== null && imagesData[category] && imagesData[category][parseInt(id)]) {
+                    displayImageDetail(category, parseInt(id));
+                } else {
+                    showError("Image non trouvée");
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                showError("Erreur de chargement des données");
+            }
+        });
+
+        function displayImageDetail(category, id) {
+            const image = imagesData[category][id];
+            const content = document.getElementById('image-detail-content');
+            const loading = document.getElementById('loading');
+            
+            content.innerHTML = `
+                <div class="detail-image-container">
+                    <img src="images/${image.file}" alt="${image.title}" class="detail-image">
+                </div>
+                <div class="p-6">
+                    <h2 class="text-3xl font-bold mb-4">${image.title}</h2>
+                    <p class="text-gray-300 text-lg mb-4 leading-relaxed">${image.description}</p>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 gap-4">
+                        <span class="text-purple-400 bg-purple-900 px-3 py-1 rounded-full text-sm">${formatCategoryName(category)}</span>
+                        <div class="flex space-x-4">
+                            <button onclick="shareImage('${image.title}', '${image.description}')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors text-sm">
+                                <i class="fas fa-share-alt mr-2"></i>Partager
+                            </button>
+                            <button onclick="downloadImage('${image.file}')" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors text-sm">
+                                <i class="fas fa-download mr-2"></i>Télécharger
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-400">
+                        <p>Résolution: 800px × 1280px</p>
+                    </div>
+                </div>
+            `;
+            
+            // Cacher le loading et afficher le contenu
+            loading.style.display = 'none';
+            content.style.display = 'block';
+            
+            // Mettre à jour le titre de la page
+            document.title = `${image.title} - Portfolio Artistique`;
+        }
+
+        function showError(message) {
+            const loading = document.getElementById('loading');
+            loading.innerHTML = `
+                <div class="text-red-400">
+                    <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-2">${message}</h2>
+                    <p class="text-gray-400">Retournez au portfolio pour voir d'autres œuvres.</p>
+                </div>
+            `;
+        }
+
+        function shareImage(title, description) {
+            const shareData = {
+                title: title,
+                text: description,
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                navigator.share(shareData)
+                    .catch(error => console.log('Erreur de partage:', error));
+            } else {
+                // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => alert('Lien copié dans le presse-papier !'))
+                    .catch(err => {
+                        // Fallback si clipboard n'est pas disponible
+                        prompt('Copiez ce lien pour partager:', window.location.href);
+                    });
+            }
+        }
+
+        function downloadImage(filename) {
+            // Créer un lien de téléchargement temporaire
+            const link = document.createElement('a');
+            link.href = 'images/' + filename;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
